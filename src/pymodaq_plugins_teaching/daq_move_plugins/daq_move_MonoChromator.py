@@ -37,8 +37,8 @@ class DAQ_Move_MonoChromator(DAQ_Move_base):
     _epsilon: Union[float, List[float]] = 0.1
     data_actuator_type = DataActuatorType.DataActuator
 
-    params = [ {'title': 'Tau', 'name': 'tau', 'type': float, 'value': 1 },
-               {'title': 'Grating', 'name': 'grating', 'type': float, 'value': 1 },
+    params = [ {'title': 'Tau', 'name': 'tau', 'type': 'float', 'value': 1 },
+               {'title': 'Grating', 'name': 'grating', 'type': 'float', 'value': 1 },
                ] + comon_parameters_fun(is_multiaxes, axis_names=_axis_names, epsilon=_epsilon)
 
     def ini_attributes(self):
@@ -133,10 +133,8 @@ class DAQ_Move_MonoChromator(DAQ_Move_base):
         value = self.check_bound(value)  #if user checked bounds, the defined bounds are applied here
         self.target_value = value
         value = self.set_position_with_scaling(value)  # apply scaling if the user specified one
-        ## TODO for your custom plugin
-        raise NotImplementedError  # when writing your own plugin remove this line
-        self.controller.your_method_to_set_an_absolute_value(value.value(self.axis_unit))  # when writing your own plugin replace this line
-        self.emit_status(ThreadCommand('Update_Status', ['Some info you want to log']))
+        self.controller.set_wavelength(value.value(self.axis_unit))  # when writing your own plugin replace this line
+        self.emit_status(ThreadCommand('Update_Status', ['The wavelength has been changed']))
 
     def move_rel(self, value: DataActuator):
         """ Move the actuator to the relative target actuator value defined by value
@@ -149,26 +147,20 @@ class DAQ_Move_MonoChromator(DAQ_Move_base):
         self.target_value = value + self.current_position
         value = self.set_position_relative_with_scaling(value)
 
-        ## TODO for your custom plugin
-        raise NotImplementedError  # when writing your own plugin remove this line
-        self.controller.your_method_to_set_a_relative_value(value.value(self.axis_unit))  # when writing your own plugin replace this line
-        self.emit_status(ThreadCommand('Update_Status', ['Some info you want to log']))
+        self.controller.set_wavelength(value.value(self.axis_unit))  # when writing your own plugin replace this line
+        self.emit_status(ThreadCommand('Update_Status', ['The wavelength has been changed relative to the previous position']))
 
     def move_home(self):
         """Call the reference method of the controller"""
 
-        ## TODO for your custom plugin
-        raise NotImplementedError  # when writing your own plugin remove this line
-        self.controller.your_method_to_get_to_a_known_reference()  # when writing your own plugin replace this line
-        self.emit_status(ThreadCommand('Update_Status', ['Some info you want to log']))
+        self.controller.find_reference()  # when writing your own plugin replace this line
+        self.emit_status(ThreadCommand('Update_Status', ['The wavelength has been set to the referenced position']))
 
     def stop_motion(self):
         """Stop the actuator and emits move_done signal"""
 
-        ## TODO for your custom plugin
-        raise NotImplementedError  # when writing your own plugin remove this line
-        self.controller.your_method_to_stop_positioning()  # when writing your own plugin replace this line
-        self.emit_status(ThreadCommand('Update_Status', ['Some info you want to log']))
+        self.controller.stop()  # when writing your own plugin replace this line
+        self.emit_status(ThreadCommand('Update_Status', ['The motion has been stopped']))
 
 
 if __name__ == '__main__':

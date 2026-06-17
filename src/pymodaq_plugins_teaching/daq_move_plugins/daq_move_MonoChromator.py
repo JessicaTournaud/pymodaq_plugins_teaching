@@ -147,7 +147,7 @@ class DAQ_Move_MonoChromator(DAQ_Move_base):
         self.target_value = value + self.current_position
         value = self.set_position_relative_with_scaling(value)
 
-        self.controller.set_wavelength(value.value(self.axis_unit))  # when writing your own plugin replace this line
+        self.controller.set_wavelength(value.value(self.axis_unit), set_type='')  # when writing your own plugin replace this line
         self.emit_status(ThreadCommand('Update_Status', ['The wavelength has been changed relative to the previous position']))
 
     def move_home(self):

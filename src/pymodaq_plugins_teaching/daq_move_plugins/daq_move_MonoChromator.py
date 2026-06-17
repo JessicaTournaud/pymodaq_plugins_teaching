@@ -8,6 +8,7 @@ from pymodaq_gui.parameter import Parameter
 
 from pymodaq_plugins_teaching.hardware.spectrometer import Spectrometer
 
+from pymodaq_data import Q_
 
 class DAQ_Move_MonoChromator(DAQ_Move_base):
     """ Instrument plugin class for an actuator.
@@ -37,8 +38,8 @@ class DAQ_Move_MonoChromator(DAQ_Move_base):
     _epsilon: Union[float, List[float]] = 0.1
     data_actuator_type = DataActuatorType.DataActuator
 
-    params = [ {'title': 'Tau', 'name': 'tau', 'type': 'float', 'value': 1 },
-               {'title': 'Grating', 'name': 'grating', 'type': 'float', 'value': 1 },
+    params = [ {'title': 'Tau (ms)', 'name': 'tau', 'type': 'float', 'value': 500 },
+               {'title': 'Gratings', 'name': 'gratings', 'type': 'list', 'limits': Spectrometer.gratings},
                ] + comon_parameters_fun(is_multiaxes, axis_names=_axis_names, epsilon=_epsilon)
 
     def ini_attributes(self):
@@ -66,7 +67,8 @@ class DAQ_Move_MonoChromator(DAQ_Move_base):
         else:
             self.controller = controller
             initialized = True
-
+        self.settings.child('tau').setValue(Q_(self.controller.tau,'s').m_as('ms'))
+        self.settings.child('gratings').setValue(Q_(self.controller.grating)
         info = "Communication established"
         return info, initialized
 
@@ -116,9 +118,10 @@ class DAQ_Move_MonoChromator(DAQ_Move_base):
         """
 
         if param.name() == "tau":
-           self.controller.tau = param.value()
+           tau_q = Q_(param.value(), 'ms')
+           self.controller.tau = tau_q.m_as('s')
 
-        elif param.name() == "grating":
+        elif param.name() == "gratings":
             self.controller.grating = param.value()
 
 

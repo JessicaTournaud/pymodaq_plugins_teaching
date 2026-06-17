@@ -34,14 +34,14 @@ class DAQ_0DViewer_PhotoDiode(DAQ_Viewer_base):
     # TODO add your particular attributes here if any
 
     """
-    params = comon_parameters + [
+    params = comon_parameters + [ {'title': 'Amplitude', 'name': 'amp', 'type': 'float', 'value': 500 },
+               {'title': 'Noise', 'name': 'noise', 'type': 'float', 'value': 0.5 },
+                                  {'title': 'Width', 'name': 'width', 'type': 'float', 'value': 20 },
         ## TODO for your custom plugin: elements to be added here as dicts in order to control your custom stage
         ]
 
     def ini_attributes(self):
         self.controller: Spectrometer = None
-
-
         pass
 
     def commit_settings(self, param: Parameter):
@@ -52,10 +52,12 @@ class DAQ_0DViewer_PhotoDiode(DAQ_Viewer_base):
         param: Parameter
             A given parameter (within detector_settings) whose value has been changed by the user
         """
-        ## TODO for your custom plugin
-        if param.name() == "a_parameter_you've_added_in_self.params":
-           self.controller.your_method_to_apply_this_param_change()  # when writing your own plugin replace this line
-#        elif ...
+        if param.name() == "amp":
+           self.controller.amplitude = param.value()  # when writing your own plugin replace this line
+        elif param.name() == "noise":
+            self.controller.noise = param.value()
+        elif param.name() == "width":
+            self.controller.width = param.value()
         ##
 
     def ini_detector(self, controller=None):
@@ -75,17 +77,19 @@ class DAQ_0DViewer_PhotoDiode(DAQ_Viewer_base):
         """
         if self.is_master:
             self.controller = Spectrometer()  #instantiate you driver with whatever arguments are needed
-            self.controller.open_communication() # call eventual methods
+            initialized = self.controller.open_communication() # call eventual methods
         else:
             self.controller = controller
             initialized = True
-
+        self.settings.child('amp').setValue(self.controller.amplitude)
+        self.settings.child('noise').setValue(self.controller.noise)
+        self.settings.child('width').setValue(self.controller.width)
         # TODO for your custom plugin (optional) initialize viewers panel with the future type of data
-        self.dte_signal_temp.emit(DataToExport(name='myplugin',
-                                               data=[DataFromPlugins(name='Mock1',
-                                                                    data=[np.array([0]), np.array([0])],
-                                                                    dim='Data0D',
-                                                                    labels=['Mock1', 'label2'])]))
+        #self.dte_signal_temp.emit(DataToExport(name='myplugin',
+                                              # data=[DataFromPlugins(name='Mock1',
+                                                                   # data=[np.array([0]), np.array([0])],
+                                                                   # dim='Data0D',
+                                                                   # labels=['Mock1', 'label2'])]))
 
         info = "Whatever info you want to log"
         return info, initialized
@@ -109,14 +113,17 @@ class DAQ_0DViewer_PhotoDiode(DAQ_Viewer_base):
 
         # synchrone version (blocking function)
         #raise NotImplementedError  # when writing your own plugin remove this line
-        data_tot = self.controller.grab_monochromator()
-        self.dte_signal.emit(DataToExport(name='myplugin',
-                                          data=[DataFromPlugins(name='Mock1', data=data_tot,
-                                                                dim='Data0D', labels=['dat0', 'data1'])]))
+        data_array = self.controller.grab_monochromator()
+        self.dte_signal.emit(DataToExport(name='MyMonochromator',
+                                          data=[
+                                              DataFromPlugins(name='Mono', data=[data_array],
+                                                                dim='Data0D', labels=['Intensity']),
 
-        # asynchrone version (non-blocking function with callback)
+                                          ]))
+
+        # asynchrone version (non-blocking function with callback) très rare uniquement si c'est trop lent
         #raise NotImplementedError  # when writing your own plugin remove this line
-        self.controller.grab_monochromator(self.callback)  # when writing your own plugin replace this line
+        #self.controller.grab_monochromator(self.callback)  # when writing your own plugin replace this line
         #########################################################
 
 

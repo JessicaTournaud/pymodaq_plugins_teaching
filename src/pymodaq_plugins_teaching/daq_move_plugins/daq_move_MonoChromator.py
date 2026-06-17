@@ -68,7 +68,7 @@ class DAQ_Move_MonoChromator(DAQ_Move_base):
             self.controller = controller
             initialized = True
         self.settings.child('tau').setValue(Q_(self.controller.tau,'s').m_as('ms'))
-        self.settings.child('gratings').setValue(Q_(self.controller.grating)
+        self.settings.child('gratings').setValue(self.controller.grating)
         info = "Communication established"
         return info, initialized
 

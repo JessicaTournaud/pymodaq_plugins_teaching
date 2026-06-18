@@ -13,7 +13,11 @@ class DAQ_2DViewer_BeamProfiler(DAQ_2DViewer_BSCamera):
                 {'title': 'Rotation (°)', 'name': 'phi', 'type': 'bool', 'default': True }
              ])
 
-
+    def ini_detector(self, controller=None):
+        info, initialized = super().ini_detector(controller)
+        #self.settings.child('phi').hide() on peut cacher certains settings
+        return info, initialized
+    
     def grab_data(self, Naverage=1, **kwargs):
         dte = self.average_data(Naverage)
         data_array_2D = dte.get_data_from_name('BSCamera').data[0]
